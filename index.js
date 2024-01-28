@@ -11,7 +11,6 @@ const User = require('./models/userschema');
 const Book = require('./models/booksschema');
 const data = require('./JSON/data.json');
 
-app.use(parser());
 app.use(session({
     secret: "a7ph@_5022",
     resave: false,
@@ -21,6 +20,8 @@ app.use(session({
     }
 }))
 
+app.use(parser());
+
 let masterName;;
 
 app.use(express.static("public"));
@@ -28,8 +29,8 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 
-
-
+// mongodb+srv://aditay:<password>@cluster0.1zkxt4u.mongodb.net/?retryWrites=true&w=majority
+//mongodb+srv://aditay:aditay2003@cluster0.1zkxt4u.mongodb.net/${db}?retryWrites=true&w=majority
 // let dbinstance;
 let db = "library";
  const url = `mongodb+srv://aditay:aditay2003@cluster0.1zkxt4u.mongodb.net/${db}?retryWrites=true&w=majority`;
@@ -43,17 +44,18 @@ let db = "library";
 //     throw err;
 // })
 
-const coneectionParams = {
-    useNewurlParser: true,
-    useUnifiedTopology: true
-}
+// const coneectionParams = {
+//     useUnifiedTopology: true
+// }
 
-mongoose.connect(url,coneectionParams)
+mongoose.connect(url)
 .then(result =>{
     console.log("Connected to MongoDb. Yeah!!!");
 })
 .catch(err =>{
-    throw err;
+    console.error("Error connecting to MongoDB:", err);
+    process.exit(1);
+    // throw err;
 })
 
 app.get('/', async (req, res) => {
