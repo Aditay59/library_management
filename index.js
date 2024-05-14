@@ -22,7 +22,8 @@ app.use(session({
 
 app.use(parser());
 
-let masterName;;
+let masterName;
+let removingBook = false;
 
 app.use(express.static("public"));
 app.use(express.json());
@@ -61,7 +62,7 @@ mongoose.connect(url)
 app.get('/', async (req, res) => {
     try {
         const books = await Book.find();
-        res.status(200).render("index", { books: books, name: masterName });
+        res.status(200).render("index", { books: books, name: masterName, msg:"" });
     } catch (error) {
         res.status(500).send('Internal Server Error');
     }
@@ -115,7 +116,7 @@ app.post('/login', async(req,res)=>{
                 }
                 else {
                     masterName = "";
-                    res.render('login',{msg: "Username or password does not match"});
+                    res.redirect('/',{msg: "Username or password does not match"});
                 }
             }
             else {
@@ -225,7 +226,7 @@ app.get('/remove/:id', async (req, res) => {
             return res.render("login", { msg: "Please login first" });
         }
 
-        const bookId = parseInt(req.params.id);
+        const bookId = parseInt(req.params.id);  
         console.log(typeof(bookId));
         console.log(bookId);
         const book = await Book.findOne({ id: bookId });
@@ -288,32 +289,34 @@ app.post('/addbook',async(req,res)=>{
     }
 })
 
-app.get('/return/:id',async (req,res)=>{
-    if(req.session.userId!=null) {
-        const bookId = parseInt(req.params.id);
-        const book = await Book.findOne({id: bookId});
+// app.get('/return/:id',async (req,res)=>{
+//     if(req.session.userId!=null) {
+//         console.log(req.params);
+//         const bookId = parseInt(req.params.id);
+//         const book = await Book.findOne({id: bookId});
 
-        if(book) {
-            const user = await User.findById(req.session.userId);
-            const bookIndex = user.borrowedBooks.findIndex((item) => item.id === parseInt(bookId));
-            if (bookIndex !== -1) {
-                user.borrowedBooks.splice(bookIndex, 1);
-                book.available = true;
-                await user.save();
-                await book.save();
-                res.redirect('/profile');
-            } else {
-                res.status(404).send('Book not found in the user\'s borrowed books');
-            }
-        }
-        else {
-            res.status(404).send('Book not found');
-        }
-    }
-    else {
-        res.render("login", { msg: "Please login first" });
-    }
-})
+//         if(book) {
+//             const user = await User.findById(req.session.userId);
+//             const bookIndex = user.borrowedBooks.findIndex((item) => item.id === parseInt(bookId));
+//             if (bookIndex !== -1) {
+//                 user.borrowedBooks.splice(bookIndex, 1);
+//                 book.available = true;
+//                 await user.save();
+//                 await book.save();
+//                 res.redirect('/profile');
+//             } else {
+//                 //res.render("index", { msg: "Book not found in the user\'s borrowed books"});
+//                 res.status(404).send('Book not found in the user\'s borrowed books');
+//             }
+//         }
+//         else {
+//             res.status(404).send('Book not found');
+//         }
+//     }
+//     else {
+//         res.render("login", { msg: "Please login first" });
+//     }
+// })
 
 app.get('/logout',(req,res)=>{
     req.session.destroy();

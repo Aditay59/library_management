@@ -61,7 +61,7 @@
                     <div class="Bname"><h3><%=items.name%></h3></div>
                     <div class="author"><h5>by:<%=items.author%></h5></div>
                     <!-- <div class="description"><p><%=items.description%></p></div> -->
-                    <a href="/return/<%= items.id %>"><button class="btn onLoan" type="button" value="onLoan">Return</button></a>
+                    <a href="/remove/<%= items.id %>"><button class="btn onLoan" type="button" value="onLoan">Return</button></a>
                    </div>
                 <%})%>
            </div>
