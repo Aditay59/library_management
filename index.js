@@ -219,32 +219,41 @@ app.get('/add/:id',async (req,res)=>{
     }
 })
 
-app.get('/remove/:id',async (req,res)=>{
-    if(req.session.userId!=null) {
-        const bookId = parseInt(req.params.id);
-        const book = await Book.findOne({id: bookId});
+app.get('/remove/:id', async (req, res) => {
+    try {
+        if (!req.session.userId) {
+            return res.render("login", { msg: "Please login first" });
+        }
 
-        if(book) {
-            const user = await User.findById(req.session.userId);
-            const bookIndex = user.borrowedBooks.findIndex((item) => item.id === parseInt(bookId));
-            if (bookIndex !== -1) {
-                user.borrowedBooks.splice(bookIndex, 1);
-                book.available = true;
-                await user.save();
-                await book.save();
-                res.redirect('/');
-            } else {
-                res.status(404).send('Book not found in the user\'s borrowed books');
-            }
+        const bookId = parseInt(req.params.id);
+        console.log(typeof(bookId));
+        console.log(bookId);
+        const book = await Book.findOne({ id: bookId });
+
+        if (!book) {
+            return res.status(404).send('Book not found');
         }
-        else {
-            res.status(404).send('Book not found');
+
+        const user = await User.findById(req.session.userId);
+
+        const bookIndex = user.borrowedBooks.findIndex((item) => item.id === bookId);
+
+        if (bookIndex === -1) {
+            return res.status(404).send('Book not borrowed by the current user');
         }
+
+        user.borrowedBooks.splice(bookIndex, 1);
+        book.available = true;
+
+        await user.save();
+        await book.save();
+
+        return res.redirect('/');
+    } catch (error) {
+        console.error('Error removing book:', error);
+        return res.status(500).send('Internal Server Error');
     }
-    else {
-        res.render("login", { msg: "Please login first" });
-    }
-})
+});
 
 app.get('/addbook',(req,res)=>{
     if(req.session.userId!=null && masterName==='admin') {
