@@ -30,24 +30,8 @@ app.use(express.json());
 app.use(express.urlencoded({extended: true}));
 app.set("view engine", "ejs");
 
-// mongodb+srv://aditay:<password>@cluster0.1zkxt4u.mongodb.net/?retryWrites=true&w=majority
-//mongodb+srv://aditay:aditay2003@cluster0.1zkxt4u.mongodb.net/${db}?retryWrites=true&w=majority
-// let dbinstance;
 let db = "library";
  const url = `mongodb+srv://aditay:aditay2003@cluster0.1zkxt4u.mongodb.net/${db}?retryWrites=true&w=majority`;
-
-// client.connect(url).then(database =>{
-//     dbinstance = database.db("library");
-//     dbinstance.collection("users");
-//     console.log("Connected to MongoDb. Yeah!!!");
-// })
-// .catch(err =>{
-//     throw err;
-// })
-
-// const coneectionParams = {
-//     useUnifiedTopology: true
-// }
 
 mongoose.connect(url)
 .then(result =>{
@@ -89,7 +73,6 @@ app.post('/login', async(req,res)=>{
                 const Userpassword = await bcrypt.compare(upass, user.password);
                 if(Userpassword) {
                     req.session.userId = user._id.toString();
-                    //res.status(200).render("admin",{books:data,name: masterName});
                     res.redirect('/');
                 }
             }
@@ -181,9 +164,6 @@ app.get('/profile', async (req, res) => {
       res.render('login', { msg: 'Please login first' });
     }
   });
-  
-
-//ADD and remove books form array of user.
 
 app.get('/add/:id',async (req,res)=>{
     if(req.session.userId!=null) {
@@ -288,35 +268,6 @@ app.post('/addbook',async(req,res)=>{
         response.status(500).send("Error adding new Book");
     }
 })
-
-// app.get('/return/:id',async (req,res)=>{
-//     if(req.session.userId!=null) {
-//         console.log(req.params);
-//         const bookId = parseInt(req.params.id);
-//         const book = await Book.findOne({id: bookId});
-
-//         if(book) {
-//             const user = await User.findById(req.session.userId);
-//             const bookIndex = user.borrowedBooks.findIndex((item) => item.id === parseInt(bookId));
-//             if (bookIndex !== -1) {
-//                 user.borrowedBooks.splice(bookIndex, 1);
-//                 book.available = true;
-//                 await user.save();
-//                 await book.save();
-//                 res.redirect('/profile');
-//             } else {
-//                 //res.render("index", { msg: "Book not found in the user\'s borrowed books"});
-//                 res.status(404).send('Book not found in the user\'s borrowed books');
-//             }
-//         }
-//         else {
-//             res.status(404).send('Book not found');
-//         }
-//     }
-//     else {
-//         res.render("login", { msg: "Please login first" });
-//     }
-// })
 
 app.get('/logout',(req,res)=>{
     req.session.destroy();
